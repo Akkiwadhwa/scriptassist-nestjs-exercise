@@ -10,6 +10,7 @@ import { TasksModule } from './modules/tasks/tasks.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TaskProcessorModule } from './queues/task-processor/task-processor.module';
 import { ScheduledTasksModule } from './queues/scheduled-tasks/scheduled-tasks.module';
+import { HealthModule } from './modules/health/health.module';
 import { CacheService } from './common/services/cache.service';
 
 @Module({
@@ -72,6 +73,7 @@ import { CacheService } from './common/services/cache.service';
     // Queue processing modules
     TaskProcessorModule,
     ScheduledTasksModule,
+    HealthModule,
   ],
   providers: [
     // Inefficient: Global cache service with no configuration options

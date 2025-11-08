@@ -5,6 +5,7 @@ import { TasksService } from './tasks.service';
 import { TasksController } from './tasks.controller';
 import { Task } from './entities/task.entity';
 import { SecurityModule } from '../../common/security/security.module';
+import { ObservabilityModule } from '../../common/observability/observability.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { SecurityModule } from '../../common/security/security.module';
       name: 'task-processing',
     }),
     SecurityModule,
+    ObservabilityModule,
   ],
   controllers: [TasksController],
   providers: [TasksService],

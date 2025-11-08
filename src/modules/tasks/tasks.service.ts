@@ -11,6 +11,7 @@ import { TaskFilterDto } from './dto/task-filter.dto';
 import { PaginatedResult } from '../../common/interfaces/paginated-result.interface';
 import { TaskBatchAction, TaskBatchOperationDto } from './dto/task-batch.dto';
 import { TaskPriority } from './enums/task-priority.enum';
+import { ObservabilityService } from '../../common/observability/observability.service';
 
 @Injectable()
 export class TasksService {
@@ -19,6 +20,7 @@ export class TasksService {
     private tasksRepository: Repository<Task>,
     @InjectQueue('task-processing')
     private taskQueue: Queue,
+    private observability: ObservabilityService,
   ) {}
 
   async create(createTaskDto: CreateTaskDto): Promise<Task> {
@@ -26,6 +28,7 @@ export class TasksService {
       const task = manager.create(Task, createTaskDto);
       const savedTask = await manager.save(Task, task);
       await this.enqueueStatusUpdates([{ taskId: savedTask.id, status: savedTask.status }]);
+      this.observability.record('task.created', { taskId: savedTask.id });
       return savedTask;
     });
   }
@@ -77,6 +80,12 @@ export class TasksService {
         ]);
       }
 
+      this.observability.record('task.updated', {
+        taskId: updatedTask.id,
+        previousStatus,
+        newStatus: updatedTask.status,
+      });
+
       return updatedTask;
     });
   }
@@ -87,6 +96,7 @@ export class TasksService {
     if (!deleteResult.affected) {
       throw new NotFoundException(`Task with ID ${id} not found`);
     }
+    this.observability.record('task.deleted', { taskId: id });
   }
 
   async findByStatus(status: TaskStatus): Promise<Task[]> {
@@ -148,10 +158,22 @@ export class TasksService {
     }
 
     switch (operation.action) {
-      case TaskBatchAction.COMPLETE:
-        return this.bulkUpdateStatus(taskIds, TaskStatus.COMPLETED, operation.action);
-      case TaskBatchAction.DELETE:
-        return this.bulkDelete(taskIds, operation.action);
+      case TaskBatchAction.COMPLETE: {
+        const response = await this.bulkUpdateStatus(taskIds, TaskStatus.COMPLETED, operation.action);
+        this.observability.record('task.batch', {
+          action: operation.action,
+          updated: response.updated,
+        });
+        return response;
+      }
+      case TaskBatchAction.DELETE: {
+        const response = await this.bulkDelete(taskIds, operation.action);
+        this.observability.record('task.batch', {
+          action: operation.action,
+          deleted: response.deleted,
+        });
+        return response;
+      }
       default:
         throw new BadRequestException(`Unsupported action: ${operation.action}`);
     }

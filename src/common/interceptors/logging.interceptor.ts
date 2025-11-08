@@ -1,37 +1,50 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  Logger,
+  NestInterceptor,
+} from '@nestjs/common';
+import { Observable, tap } from 'rxjs';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   private readonly logger = new Logger(LoggingInterceptor.name);
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    // TODO: Implement comprehensive request/response logging
-    // This interceptor should:
-    // 1. Log incoming requests with relevant details
-    // 2. Measure and log response time
-    // 3. Log outgoing responses
-    // 4. Include contextual information like user IDs when available
-    // 5. Avoid logging sensitive information
+    const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
+    const correlationId =
+      (request.headers['x-correlation-id'] as string) || randomUUID();
 
-    const req = context.switchToHttp().getRequest();
-    const method = req.method;
-    const url = req.url;
+    request.headers['x-correlation-id'] = correlationId;
+    response?.setHeader?.('x-correlation-id', correlationId);
+
     const now = Date.now();
-
-    // Basic implementation (to be enhanced by candidates)
-    this.logger.log(`Request: ${method} ${url}`);
+    this.logger.log(
+      `Request ${request.method} ${request.url}`,
+      correlationId,
+    );
 
     return next.handle().pipe(
       tap({
-        next: (val) => {
-          this.logger.log(`Response: ${method} ${url} ${Date.now() - now}ms`);
+        next: () => {
+          const duration = Date.now() - now;
+          this.logger.log(
+            `Response ${request.method} ${request.url} - ${response.statusCode} (${duration}ms)`,
+            correlationId,
+          );
         },
-        error: (err) => {
-          this.logger.error(`Error in ${method} ${url} ${Date.now() - now}ms: ${err.message}`);
+        error: (error) => {
+          const duration = Date.now() - now;
+          this.logger.error(
+            `Error ${request.method} ${request.url} (${duration}ms)`,
+            error?.stack || error,
+            correlationId,
+          );
         },
       }),
     );
   }
-} 
+}

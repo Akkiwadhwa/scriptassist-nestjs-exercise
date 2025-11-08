@@ -7,6 +7,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { User } from '../users/entities/user.entity';
+import { ObservabilityService } from '../../common/observability/observability.service';
 
 interface RefreshTokenPayload {
   sub: string;
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @Inject('JWT_REFRESH_SERVICE')
     private readonly refreshJwtService: JwtService,
+    private readonly observability: ObservabilityService,
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -38,7 +40,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid password');
     }
 
-    return this.buildAuthResponse(user);
+    const response = this.buildAuthResponse(user);
+    this.observability.record('auth.login', { userId: user.id });
+    return response;
   }
 
   async register(registerDto: RegisterDto) {
@@ -50,7 +54,9 @@ export class AuthService {
 
     const user = await this.usersService.create(registerDto);
 
-    return this.buildAuthResponse(user);
+    const response = this.buildAuthResponse(user);
+    this.observability.record('auth.register', { userId: user.id });
+    return response;
   }
 
   async refreshTokens(refreshTokenDto: RefreshTokenDto) {
@@ -72,7 +78,9 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token revoked');
     }
 
-    return this.buildAuthResponse(user);
+    const response = this.buildAuthResponse(user);
+    this.observability.record('auth.refresh', { userId: user.id });
+    return response;
   }
 
   async validateUser(userId: string): Promise<any> {
