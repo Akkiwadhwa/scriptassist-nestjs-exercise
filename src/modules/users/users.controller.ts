@@ -10,7 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
   ValidationPipe,
-  Post
+  Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,10 +18,17 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserFilterDto } from './dto/user-filter.dto';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 @ApiTags('users')
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
+@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@Roles('admin')
+@RateLimit(30, 60000)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

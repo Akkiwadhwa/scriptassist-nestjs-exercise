@@ -28,4 +28,8 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-} 
+
+  @Column({ name: 'refresh_token_hash', nullable: true })
+  @Exclude({ toPlainOnly: true })
+  refreshTokenHash?: string | null;
+}

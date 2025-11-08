@@ -91,6 +91,19 @@ export class UsersService {
     await this.usersRepository.remove(user);
   }
 
+  async setCurrentRefreshToken(userId: string, refreshTokenId: string): Promise<void> {
+    const hash = await bcrypt.hash(refreshTokenId, 10);
+    await this.usersRepository.update(userId, {
+      refreshTokenHash: hash,
+    });
+  }
+
+  async removeRefreshToken(userId: string): Promise<void> {
+    await this.usersRepository.update(userId, {
+      refreshTokenHash: null,
+    });
+  }
+
   private normalizePagination(filter: UserFilterDto = {} as UserFilterDto): UserFilterDto {
     const page = Math.max(1, Number(filter?.page ?? 1));
     const limit = Math.min(100, Math.max(1, Number(filter?.limit ?? 25)));

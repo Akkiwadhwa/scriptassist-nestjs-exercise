@@ -18,15 +18,15 @@ import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 import { TaskFilterDto } from './dto/task-filter.dto';
 import { TaskBatchOperationDto } from './dto/task-batch.dto';
-
-// This guard needs to be implemented or imported from the correct location
-// We're intentionally leaving it as a non-working placeholder
-class JwtAuthGuard {}
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('tasks')
 @Controller('tasks')
-@UseGuards(JwtAuthGuard, RateLimitGuard)
-@RateLimit({ limit: 100, windowMs: 60000 })
+@UseGuards(JwtAuthGuard, RolesGuard, RateLimitGuard)
+@Roles('user', 'admin')
+@RateLimit(100, 60000)
 @ApiBearerAuth()
 export class TasksController {
   constructor(
