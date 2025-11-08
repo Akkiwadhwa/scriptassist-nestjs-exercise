@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # TaskFlow API - Senior Backend Engineer Coding Challenge
 
 ## Introduction
@@ -255,4 +255,3 @@ The API should expose the following endpoints:
 Good luck! This challenge is designed to test the skills of experienced engineers in creating scalable, maintainable, and secure systems.
 =======
 # scriptassist-nestjs-exercise
->>>>>>> 4b67b5f0d0ac68e0641dd44c94958f04de8107fa

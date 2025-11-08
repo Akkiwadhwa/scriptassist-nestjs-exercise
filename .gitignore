@@ -1,24 +1,21 @@
-<<<<<<< HEAD
+
 # compiled output
 /dist
 /node_modules
 /build
 
-=======
->>>>>>> 4b67b5f0d0ac68e0641dd44c94958f04de8107fa
 # Logs
 logs
 *.log
 npm-debug.log*
-<<<<<<< HEAD
+
 pnpm-debug.log*
-=======
->>>>>>> 4b67b5f0d0ac68e0641dd44c94958f04de8107fa
+
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-<<<<<<< HEAD
+
 # OS
 .DS_Store
 
@@ -51,7 +48,6 @@ lerna-debug.log*
 
 # Bun
 .bun 
-=======
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -183,4 +179,3 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
->>>>>>> 4b67b5f0d0ac68e0641dd44c94958f04de8107fa
